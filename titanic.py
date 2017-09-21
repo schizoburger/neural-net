@@ -18,7 +18,7 @@ print('combined: ', td.combined.shape, ', x_train: ', x_train.shape, ', x_cv: ',
 print('\n\n')
 
 NN = nn.Neural_Network(dimensionality=x_train.shape[1],hidden_size=30,\
-        output_size=1,learning_rate=0.001,dropout_input_rate=0.2,\
+        output_size=1,learning_rate=0.001,\
         dropout_hidden_rate=0.5,do_dropout=False,\
         error_function='cross_entropy',do_regularize=False,\
         regularization_rate=1,add_bias=True,use_nesterov_momentum=False,\

@@ -12,27 +12,27 @@ x_test = mnist.test.images
 y_test = mnist.test.labels
 
 
-NN = nn.Neural_Network(dimensionality=x_train.shape[1],hidden_size=30,\
-        output_size=10,learning_rate=0.1,dropout_input_rate=0.2,\
-        dropout_hidden_rate=0.5,do_dropout=False,\
-        error_function='cross_entropy',do_regularize=False,\
-        regularization_rate=1,add_bias=True,use_nesterov_momentum=False,\
-        momentum_rate=0.9,do_random_seed=True,random_seed=1)
+#NN = nn.Neural_Network(dimensionality=x_train.shape[1],hidden_size=30,\
+#        output_size=10,learning_rate=0.1,dropout_input_rate=0.2,\
+#        dropout_hidden_rate=0.5,do_dropout=False,\
+#        error_function='cross_entropy',do_regularize=False,\
+#        regularization_rate=1,add_bias=True,use_nesterov_momentum=False,\
+#        momentum_rate=0.9,do_random_seed=True,random_seed=1)
 
 
-start_time = time.time()
+#start_time = time.time()
 
-for i in range(50):
-    NN.learn_using_gradient_descent(x=x_train,y=y_train,current_iteration=i,\
-    print_loss_every=10,clip=True)
+#for i in range(50):
+#    NN.learn_using_gradient_descent(x=x_train,y=y_train,current_iteration=i,\
+#    print_loss_every=10,clip=True)
 
-print("\n\n--- %s seconds ---" % (time.time() - start_time))
+#print("\n\n--- %s seconds ---" % (time.time() - start_time))
 
-print('Accuracy on CV with gradient descent: ', NN.accuracy(x_cv,y_cv))
+#print('Accuracy on CV with gradient descent: ', NN.accuracy(x_cv,y_cv))
 
-NN = nn.Neural_Network(dimensionality=x_train.shape[1],hidden_size=30,\
-        output_size=10,learning_rate=0.01,dropout_input_rate=0.2,\
-        dropout_hidden_rate=0.5,do_dropout=False,\
+NN = nn.Neural_Network(dimensionality=x_train.shape[1],hidden_size=100,\
+        output_size=10,learning_rate=0.1,\
+        dropout_hidden_rate=0.5,do_dropout=True,\
         error_function='cross_entropy',do_regularize=False,\
         regularization_rate=1,add_bias=True,use_nesterov_momentum=False,\
         momentum_rate=0.9,do_random_seed=True,random_seed=1)
