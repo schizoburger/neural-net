@@ -36,7 +36,7 @@ class Neural_Network(object):
 
     def sigmoid(self, x, clip=True):
         if clip==True:
-            return np.clip(1/(1+np.exp(-x)),1e-4,9e-4)
+            return np.clip(1/(1+np.exp(-x)),0.0001,0.9999)
         else:
             return 1/(1+np.exp(-x))
 
@@ -49,7 +49,7 @@ class Neural_Network(object):
         if self.do_dropout==True:
             if test_time==False:
                 drop = (np.random.rand(self.dimensionality)<self.dropout_input_rate)
-                self.x *= drop
+                x *= drop
             else:
                 W1 *= self.dropout_input_rate
         self.z2 = np.dot(x, W1)
@@ -160,23 +160,16 @@ class Neural_Network(object):
         if print_loss==True:
             print("Epoch ", current_epoch, 'loss ', self.loss(self.forward(x,clip), y, self.error_function,None, self.do_regularize, self.regularization_rate,self.W1, self.W2))
 
-    def predict(self, x_test, threshold):
-        self.do_dropout=False
-        arr_test=np.zeros((x_test.shape[0],1))
-        yHat_test=self.forward(x_test,False,True)
-        for i in range(0,x_test.shape[0]-1):
-            if yHat_test[i] > threshold:
-                arr_test[i]=1
-        return arr_test
-
-    def error(self, y_test, yHat_test):
-        print(np.sum(np.subtract(y_test,yHat_test)==0)/y_test.shape[0])
-
-    def accuracy(self, x_test, y_test):
-        self.do_dropout = False
+    def accuracy(self, x_test, y_test, threshold=None):
+        multiple_outputs = y_test.shape[1] > 1
         correctly_classified=0
-        yHat_test=self.forward(x_test,False,True)
+        yHat_test=self.forward(x_test,True,True)
         for i in range(y_test.shape[0]):
-            if np.argmax(yHat_test[i])==np.argmax(y_test[i]):
-                correctly_classified+=1
+            if multiple_outputs == True:
+                if np.argmax(yHat_test[i])==np.argmax(y_test[i]):
+                    correctly_classified+=1
+            else:
+                prediction = yHat_test[i] > threshold
+                if int(prediction)==int(y_test[i]):
+                    correctly_classified += 1
         return correctly_classified/y_test.shape[0]
