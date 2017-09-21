@@ -7,14 +7,23 @@ import random
 
 class Neural_Network(object):
 
-    def __init__(self, dimensionality, hidden_size=1, output_size = 1, learning_rate=0.5, dropout_input_rate = 0.2 ,dropout_hidden_rate=0.5,
-                 do_dropout=False, error_function='sum_of_squared',
-                 do_regularize=False, regularization_rate=0.5, add_bias=True, use_nesterov_momentum=False, momentum_rate=0.9, do_random_seed=True, random_seed=1):
+    def __init__(self, dimensionality, hidden_size=1, output_size = 1,\
+                    learning_rate=0.5, decay_learning_rate = False,\
+                    learning_rate_decay_rate = 0.5,\
+                    learning_rate_decay_step = 5,\
+                    dropout_hidden_rate=0.5, do_dropout=False,\
+                    error_function='sum_of_squared', do_regularize=False,\
+                    regularization_rate=0.5, add_bias=True,\
+                    use_nesterov_momentum=False, momentum_rate=0.9,\
+                    do_random_seed=True, random_seed=1):
+
         self.dimensionality = dimensionality
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.learning_rate = learning_rate
-        self.dropout_input_rate = 1 - dropout_input_rate
+        self.decay_learning_rate = decay_learning_rate
+        self.learning_rate_decay_rate = learning_rate_decay_rate
+        self.learning_rate_decay_step = learning_rate_decay_step
         self.dropout_hidden_rate = 1 - dropout_hidden_rate
         self.do_dropout = do_dropout
         self.error_function = error_function
@@ -46,20 +55,14 @@ class Neural_Network(object):
     def forward(self, x, clip=True, test_time=False):
         W1 = self.W1
         W2 = self.W2
-        if self.do_dropout==True:
-            if test_time==False:
-                drop = (np.random.rand(self.dimensionality)<self.dropout_input_rate)
-                x *= drop
-            else:
-                W1 *= self.dropout_input_rate
         self.z2 = np.dot(x, W1)
         if self.add_bias==True:
             self.z2 += self.b1
         self.a2 = self.sigmoid(self.z2, clip)
         if self.do_dropout==True:
             if test_time==False:
-                drop = (np.random.rand(self.hidden_size)<self.dropout_hidden_rate)
-                self.a2 *= drop
+                self.dropout_hidden_mask = (np.random.rand(self.hidden_size)<self.dropout_hidden_rate)
+                self.a2 *= self.dropout_hidden_mask
             else:
                 W2 *= self.dropout_hidden_rate
         self.z3 = np.dot(self.a2, W2)
@@ -94,10 +97,11 @@ class Neural_Network(object):
         else:
             dJdz3=(self.a3-y)
         delta3 = dJdz3
-        dJdz2 = delta3
-        dz2da2 = self.W2.T
+        dz3da2 = self.W2.T
         da2dz2 = self.a2*(1.0-self.a2)
-        delta2 = np.dot(dJdz2,dz2da2)*da2dz2
+        if self.do_dropout==True:
+            da2dz2*=self.dropout_hidden_mask
+        delta2 = np.dot(dJdz3,dz3da2)*da2dz2
         return delta2, delta3
 
     def lossDeriv(self, x, y):
@@ -136,6 +140,8 @@ class Neural_Network(object):
             self.b2 = self.b2 - self.learning_rate*dJdb2
         if current_iteration % print_loss_every == 0:
             print("Iteration ", current_iteration, 'loss ', self.loss(self.a3, y, self.error_function,None, self.do_regularize, self.regularization_rate,self.W1, self.W2))
+        if self.decay_learning_rate and current_iteration % self.learning_rate_decay_step == 0:
+            self.learning_rate*=self.learning_rate_decay_rate
 
     def learn_using_stochastic_gradient_descent(self, x, y, mini_batch_size, current_epoch,clip=True,print_loss=True):
         combined_train_array = np.append(x,y,axis=1)
@@ -159,6 +165,8 @@ class Neural_Network(object):
                 self.b2 = self.b2 - self.learning_rate*dJdb2
         if print_loss==True:
             print("Epoch ", current_epoch, 'loss ', self.loss(self.forward(x,clip), y, self.error_function,None, self.do_regularize, self.regularization_rate,self.W1, self.W2))
+        if self.decay_learning_rate and current_epoch % self.learning_rate_decay_step == 0:
+            self.learning_rate*=self.learning_rate_decay_rate
 
     def accuracy(self, x_test, y_test, threshold=None):
         multiple_outputs = y_test.shape[1] > 1
