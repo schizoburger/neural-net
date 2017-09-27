@@ -1,0 +1,110 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\title{Gradient Descent}
+\author{Michal Zmyslowski}
+\date{September 2017}
+
+\begin{document}
+
+\maketitle
+\section{Heuristics}
+
+\section{Convergence proof}
+In this section, we will show the formal proof for the convergence of the gradient descent algorithm. Although before we begin, we will prove a useful lemma.
+\begin{lemma}
+If $f$ is differentiable and $f'$ is Lipschitz continuous with constant L, then $$|f(\mathbf{x})-f(\mathbf{y})-\nabla f(\mathbf{y})^\mathbf{T}(\mathbf{x}-\mathbf{y})|\leq\frac{L}{2}\|\mathbf{x}-\mathbf{y}\|^2$$
+\end{lemma}
+
+\begin{proof}
+Let $g(t):=f(\mathbf{y}+t(\mathbf{x}-\mathbf{y}))$, then $g(0)=f(\mathbf{y})$, $g(1)=f(\mathbf{x})$ and
+\newline
+$\frac{dg(t)}{dt}=\nabla f(\mathbf{y}-t(\mathbf{x}-\mathbf{y}))^\mathbf{T}(\mathbf{x}-\mathbf{y})$. Now we have,
+$\int\limits_0^1 \frac{dg(t)}{dt} \ dt=g(1)-g(0)$. Therefore,
+$$|f(\mathbf{x})-f(\mathbf{y})-\nabla f(\mathbf{y})^\mathbf{T}(\mathbf{x}-\mathbf{y})|=$$
+$$|g(1)-g(0)-\nabla f(\mathbf{y})^\mathbf{T}(\mathbf{x}-\mathbf{y})|=$$
+$$| \int\limits_0^1 \frac{dg(t)}{dt} \ dt-\nabla f(\mathbf{y})^\mathbf{T}(\mathbf{x}-\mathbf{y})|=$$
+$$| \int\limits_0^1 \nabla f(\mathbf{y}-t(\mathbf{x}-\mathbf{y}))^\mathbf{T}(\mathbf{x}-\mathbf{y}) \ dt-\nabla f(\mathbf{y})^\mathbf{T}(\mathbf{x}-\mathbf{y})|=$$
+$$| \int\limits_0^1 \nabla f(\mathbf{y}-t(\mathbf{x}-\mathbf{y}))^\mathbf{T}(\mathbf{x}-\mathbf{y}) \ dt-\int\limits_0^1 \nabla f(\mathbf{y})^\mathbf{T}(\mathbf{x}-\mathbf{y})\ dt|\leq$$
+$$\int\limits_0^1 |\nabla f(\mathbf{y}-t(\mathbf{x}-\mathbf{y}))^\mathbf{T}(\mathbf{x}-\mathbf{y}) - \nabla f(\mathbf{y})^\mathbf{T}(\mathbf{x}-\mathbf{y})|\ dt=$$
+$$\int\limits_0^1 |(\nabla f(\mathbf{y}-t(\mathbf{x}-\mathbf{y}))^\mathbf{T} - \nabla f(\mathbf{y})^\mathbf{T})(\mathbf{x}-\mathbf{y})|\ dt$$
+
+By Cauchy–Schwarz inequality:
+
+$$\int\limits_0^1 |(\nabla f(\mathbf{y}-t(\mathbf{x}-\mathbf{y}))^\mathbf{T} - \nabla f(\mathbf{y})^\mathbf{T})(\mathbf{x}-\mathbf{y})|\ dt \leq$$
+
+$$\int\limits_0^1 \|\nabla f(\mathbf{y}-t(\mathbf{x}-\mathbf{y}))^\mathbf{T} - \nabla f(\mathbf{y})^\mathbf{T}\|\|(\mathbf{x}-\mathbf{y})\| dt=$$
+
+$$ \|(\mathbf{x}-\mathbf{y})\| \int\limits_0^1 \|\nabla f(\mathbf{y}-t(\mathbf{x}-\mathbf{y}))^\mathbf{T} - \nabla f(\mathbf{y})^\mathbf{T}\|dt$$
+
+Since $f'$ is Lipschitz continuous with constant L, we get:
+
+$$ \|(\mathbf{x}-\mathbf{y})\| \int\limits_0^1 \|\nabla f(\mathbf{y}-t(\mathbf{x}-\mathbf{y}))^\mathbf{T} - \nabla f(\mathbf{y})^\mathbf{T}\|dt \leq$$
+
+$$ \|(\mathbf{x}-\mathbf{y})\| \int\limits_0^1\frac{L}{2}\|(\mathbf{y}-t(\mathbf{x}-\mathbf{y})-\mathbf{y})\|\ dt=$$
+
+$$ \|(\mathbf{x}-\mathbf{y})\| \int\limits_0^1\frac{L}{2}\|(\mathbf{x}-\mathbf{y})\|t\ dt=$$
+
+$$\frac{L}{2}\|(\mathbf{x}-\mathbf{y})\|^2$$
+
+\end{proof}
+
+Functions satisfying $f(\mathbf{y}) \geq f(\mathbf{x}) + \nabla f(\mathbf{y})^\mathbf{T} (\mathbf{x}-\mathbf{y}) + \frac{L}{2} \|\mathbf{x}-\mathbf{y}\|^2$ with some constant L are called strongly convex.
+
+\begin{theorem}
+Let $f$ be differentiable, $f'$ be Lipschitz continuous with constant L and $minf(x)>-\infty$. Then the gradient descent algorithm with a constant step size $t<\frac{2}{L}$ will converge to a stationary point, i.e. $\nabla f(\mathbf{x})=0$.
+\end{theorem}
+
+\begin{proof}
+The gradient descent is defined as follows,
+\begin{equation}
+\mathbf{x_{k+1}}:=\mathbf{x_{k}}-t\nabla f(\mathbf{x_k}).
+\end{equation}
+\newline
+By Lemma 1,
+
+$$f(\mathbf{x_{k+1}}) \leq f(\mathbf{x_{k}})+ \nabla f(\mathbf{x_{k}})(\mathbf{x_{k+1}}-\mathbf{x_{k+1}})+ \frac{L}{2}\|(\mathbf{x}-\mathbf{y})\|^2$$
+From (1),
+$$\mathbf{x_{k+1}}-\mathbf{x_{k}}=-t\nabla f(\mathbf{x_k})$$
+Therefore,
+$$f(\mathbf{x_{k}})+ \nabla f(\mathbf{x_{k}})(\mathbf{x_{k+1}}-\mathbf{x_{k+1}})+ \frac{L}{2}\|(\mathbf{x}-\mathbf{y})\|^2=$$
+
+$$f(\mathbf{x_{k}})+ \nabla f(\mathbf{x_{k}})(-t\nabla f(\mathbf{x_k}))+ \frac{L}{2}\|(-t\nabla f(\mathbf{x_k}))\|^2=$$
+
+$$f(\mathbf{x_{k}})-t\|\nabla f(\mathbf{x_k})\|^2+ \frac{Lt^2}{2}\|\nabla f(\mathbf{x_k})\|^2=$$
+
+$$f(\mathbf{x_{k}})-t(1 - \frac{Lt}{2}) \| \nabla f(\mathbf{x_k})\|^2$$
+
+Thus,
+
+$$f(\mathbf{x_{k+1}}) \leq f(\mathbf{x_{k}})-t(1 - \frac{Lt}{2}) \| \nabla f(\mathbf{x_k})\|^2$$
+
+$$\Rightarrow f(\mathbf{x_{k+1}}) - f(\mathbf{x_{k}}) \leq -t(1 - \frac{Lt}{2}) \| \nabla f(\mathbf{x_k})\|^2$$
+
+Rearranging terms and noting that $-t(1 - \frac{Lt}{2}) < 0$, since we assumed that $t<\frac{2}{L}$, we get
+
+$$\| \nabla f(\mathbf{x_k})\|^2 \leq \frac{f(\mathbf{x_{k}}) - f(\mathbf{x_{k+1}})}{t(1 - \frac{Lt}{2})}$$
+
+$$\Rightarrow\sum_{k=0}^{N} \| \nabla f(\mathbf{x_k})\|^2 \leq \frac{1}{t(1 - \frac{Lt}{2})} \sum_{k=0}^{N} f(\mathbf{x_{k}}) - f(\mathbf{x_{k+1}})$$
+
+We note that,
+
+$$\frac{1}{t(1 - \frac{Lt}{2})} \sum_{k=0}^{N} f(\mathbf{x_{k}}) - f(\mathbf{x_{k+1}})=\frac{f(\mathbf{x_{0}}) - f(\mathbf{x_{N}})}{t(1 - \frac{Lt}{2})}$$
+
+$$\frac{f(\mathbf{x_{0}}) - f(\mathbf{x_{N}})}{t(1 - \frac{Lt}{2})} \leq \frac{f(\mathbf{x_{0}}) - minf(\mathbf{x})}{t(1 - \frac{Lt}{2})}$$
+
+Therefore,
+
+$$\lim_{N\to\infty} \sum_{k=0}^{N} \| \nabla f(\mathbf{x_k})\|^2 < \infty$$
+
+$$\Rightarrow\lim_{k\to\infty} \| \nabla f(\mathbf{x_k})\|^2 = 0$$
+
+$$\Rightarrow\lim_{k\to\infty} \nabla f(\mathbf{x_k}) = 0$$
+\end{proof}
+\end{document}
