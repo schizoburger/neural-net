@@ -3,6 +3,7 @@
 \usepackage[english]{babel}
 
 \usepackage{amsthm}
+\usepackage{amssymb}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -12,9 +13,46 @@
 \date{September 2017}
 
 \begin{document}
-
 \maketitle
+\begin{abstract}
+Gradient descent is a popular first-order optimization algorithm in machine learning for minimizing a function. It looks really simple, but the reasoning for why it works is usually superficial. In the first section, we will use mathematical heuristics to show that it actually makes sense. In the second section, we will give the formal proof for its convergence together with the proof for the important lemma it relies on, which is usually omitted in the optimization textbooks.
+\end{abstract}
 \section{Heuristics}
+The gradient descent is defined as follows,
+$$\mathbf{x_{k+1}}:=\mathbf{x_{k}}-t\nabla f(\mathbf{x_k}).$$
+In this section, we will show where the term $-t\nabla f(\mathbf{x_k})$ comes from and we will be content with approximations and saying that 1 is a small value.
+\bigskip
+\newline
+Let $f:\mathbb{R}^n \to \mathbb{R}^n$ be a differentiable function and $\mathbf{x_{0}}. \in \mathbb{R}^n$. We want to 
+\newline
+find $\mathbf{x} \in \mathbb{R}^n$ such that $f(\mathbf{x_{0}}+\mathbf{x}) \leq f(\mathbf{x_{0}})$. By Taylor series,
+\begin{equation}
+f(\mathbf{x}) \approx f(\mathbf{x_{0}})+ \nabla f(\mathbf{x_{0}})^{\mathbf{T}}(\mathbf{x}-\mathbf{x_{0}})
+\end{equation}
+\noindent
+is a good linear approximation of $f$ locally at $x_{0}$. From (1),
+
+$$f(\mathbf{x_{0}} + \mathbf{x}) \approx f(\mathbf{x_{0}}) + \nabla f(\mathbf{x_{0}})^{\mathbf{T}}\mathbf{x}$$
+\noindent
+We want to find $\mathbf{x}$ such that (1) is still good approximation of $f$ in order to $f(\mathbf{x_{0}}+\mathbf{x}) \leq f(\mathbf{x_{0}})$. Therefore, we need to make $\|\mathbf{x}\|$ small. As a matter of convenience, let $\mathbf{x}$ be a unit vector, i.e. $\|\mathbf{x}\|=1$. Thus,
+
+$$f(\mathbf{x_{0}} + \mathbf{x}) \approx f(\mathbf{x_{0}}) + \nabla f(\mathbf{x_{0}})^{\mathbf{T}}\mathbf{x}=$$
+
+$$f(\mathbf{x_{0}}) + \| \nabla f(\mathbf{x_{0}})\|\|\mathbf{x}\|cos\theta$$
+\noindent
+where $\theta$ is an angle between $\mathbf{x_0}$ and $\nabla f(\mathbf{x_0})$ and $\|\centerdot\|$ is the Euclidean norm. From assumption that $\|\mathbf{x}\|=1$,
+
+$$f(\mathbf{x_{0}} + \mathbf{x}) \approx f(\mathbf{x_{0}}) + \| \nabla f(\mathbf{x_{0}})\|cos\theta$$
+\noindent
+Since $f(\mathbf{x_0})$ and $\nabla f(\mathbf{x_{0}})$ are constants and $\| \nabla f(\mathbf{x_{0}})\| \geq 0$, we want to find $\mathbf{x}$ such that $cos\theta=-1$ to decrease the function maximally. Let $\mathbf{x}=- \frac{\nabla f(\mathbf{x_0})}{\|\nabla f(\mathbf{x_0})\|}$ and we see that 
+$\|x\|=\|- \frac{\nabla f(\mathbf{x_0})}{\|\nabla f(\mathbf{x_0})\|}\|=\frac{\|\nabla f(\mathbf{x_0})\|}{\|\nabla f(\mathbf{x_0})\|}=1$. Now,
+
+$$\nabla f(\mathbf{x_{0}})^{\mathbf{T}}(- \frac{\nabla f(\mathbf{x_0})}{\|\nabla f(\mathbf{x_0})\|})=\| \nabla f(\mathbf{x_{0}})\|cos\theta$$
+
+$$\Leftrightarrow -\nabla f(\mathbf{x_{0}})^{\mathbf{T}}\nabla f(\mathbf{x_{0}})=(\sqrt{\nabla f(\mathbf{x_{0}})^{\mathbf{T}}\nabla f(\mathbf{x_{0}})})^2cos\theta $$
+
+$$\Leftrightarrow cos \theta = -1$$
+
 
 \section{Convergence proof}
 In this section, we will show the formal proof for the convergence of the gradient descent algorithm. Although before we begin, we will prove a useful lemma.
