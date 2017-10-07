@@ -42,3 +42,4 @@ MNIST_data
 mnist_tf_linear_regression.ipynb
 .ipynb_checkpoints/
 tf_guide.py
+random_stuff/
