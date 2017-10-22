@@ -1,4 +1,4 @@
-# Neural net
+# Neural Net
 
 Implemented a neural network with one hidden layer and tested it on the Titanic from Kaggle and MNIST datasets.
 
@@ -34,3 +34,6 @@ Tensorflow
 ## Acknowledgments
 
 * Titanic dataset from Kaggle processed with the following tutorial: http://ahmedbesbes.com/how-to-score-08134-in-titanic-kaggle-challenge.html
+* Inspiration for my implementation of a neural network:
+http://neuralnetworksanddeeplearning.com/chap1.html
+http://cs231n.github.io/
