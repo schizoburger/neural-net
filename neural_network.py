@@ -43,22 +43,31 @@ class Neural_Network(object):
         self.last_W2 = np.zeros(self.W2.shape)
 
 
-    def sigmoid(self, x, clip=True):
-        if clip==True:
-            return np.clip(1/(1+np.exp(-x)),0.0001,0.9999)
+    @staticmethod
+    def sigmoid(x):
+        stable_sigmoid = np.vectorize(Neural_Network.__stable_sigmoid_function)
+        return stable_sigmoid(x)
+
+    @staticmethod
+    def __stable_sigmoid_function(x):
+        "Numerically-stable sigmoid function."
+        if x >= 0:
+            z = np.exp(-x)
+            return 1/(1+z)
         else:
-            return 1/(1+np.exp(-x))
+            z = np.exp(x)
+            return z/(1+z)
 
-    def sigmoidDeriv(self, x, clip):
-        return self.sigmoid(x, clip)*(1-self.sigmoid(x,clip))
+    def sigmoidDeriv(self, x):
+        return self.sigmoid(x)*(1-self.sigmoid(x))
 
-    def forward(self, x, clip=True, test_time=False):
+    def forward(self, x, test_time=False):
         W1 = self.W1
         W2 = self.W2
         self.z2 = np.dot(x, W1)
         if self.add_bias==True:
             self.z2 += self.b1
-        self.a2 = self.sigmoid(self.z2, clip)
+        self.a2 = self.sigmoid(self.z2)
         if self.do_dropout==True:
             if test_time==False:
                 self.dropout_hidden_mask = (np.random.rand(self.hidden_size)<self.dropout_hidden_rate)
@@ -68,7 +77,7 @@ class Neural_Network(object):
         self.z3 = np.dot(self.a2, W2)
         if self.add_bias==True:
             self.z3 += self.b2
-        self.a3 = self.sigmoid(self.z3, clip)
+        self.a3 = self.sigmoid(self.z3)
         return self.a3
 
     @staticmethod
@@ -123,7 +132,7 @@ class Neural_Network(object):
     def backprop(self,x,y):
         return self.lossDeriv(x,y)
 
-    def learn_using_gradient_descent(self, x, y, current_iteration, print_loss_every, clip=True):
+    def learn_using_gradient_descent(self, x, y, current_iteration, print_loss_every):
         if self.use_nesterov_momentum==True:
                 delta_W1 = self.W1 - self.last_W1
                 delta_W2 = self.W2 - self.last_W2
@@ -131,7 +140,7 @@ class Neural_Network(object):
                 self.W2 += self.momentum_rate*delta_W2
                 self.last_W1 = self.W1
                 self.last_W2 = self.W2
-        self.forward(x, clip)
+        self.forward(x)
         dJdW1, dJdW2, dJdb1, dJdb2 = self.backprop(x,y)
         self.W1 = self.W1 - self.learning_rate*dJdW1
         self.W2 = self.W2 - self.learning_rate*dJdW2
@@ -143,7 +152,7 @@ class Neural_Network(object):
         if self.decay_learning_rate and current_iteration % self.learning_rate_decay_step == 0:
             self.learning_rate*=self.learning_rate_decay_rate
 
-    def learn_using_stochastic_gradient_descent(self, x, y, mini_batch_size, current_epoch,clip=True,print_loss=True):
+    def learn_using_stochastic_gradient_descent(self, x, y, mini_batch_size, current_epoch,print_loss=True):
         combined_train_array = np.append(x,y,axis=1)
         random.shuffle(combined_train_array)
         x_train = combined_train_array[:,:-y.shape[1]]
@@ -156,7 +165,7 @@ class Neural_Network(object):
                 self.W2 += self.momentum_rate*delta_W2
                 self.last_W1 = self.W1
                 self.last_W2 = self.W2
-            self.forward(x_train[k:k+mini_batch_size],clip)
+            self.forward(x_train[k:k+mini_batch_size])
             dJdW1, dJdW2, dJdb1, dJdb2 = self.backprop(x_train[k:k+mini_batch_size],y_train[k:k+mini_batch_size])
             self.W1 = self.W1 - self.learning_rate*dJdW1
             self.W2 = self.W2 - self.learning_rate*dJdW2
@@ -164,14 +173,14 @@ class Neural_Network(object):
                 self.b1 = self.b1 - self.learning_rate*dJdb1
                 self.b2 = self.b2 - self.learning_rate*dJdb2
         if print_loss==True:
-            print("Epoch ", current_epoch, 'loss ', self.loss(self.forward(x,clip), y, self.error_function,None, self.do_regularize, self.regularization_rate,self.W1, self.W2))
+            print("Epoch ", current_epoch, 'loss ', self.loss(self.forward(x), y, self.error_function,None, self.do_regularize, self.regularization_rate,self.W1, self.W2))
         if self.decay_learning_rate and current_epoch % self.learning_rate_decay_step == 0:
             self.learning_rate*=self.learning_rate_decay_rate
 
     def accuracy(self, x_test, y_test, threshold=None):
         multiple_outputs = y_test.shape[1] > 1
         correctly_classified=0
-        yHat_test=self.forward(x_test,True,True)
+        yHat_test=self.forward(x_test,True)
         for i in range(y_test.shape[0]):
             if multiple_outputs == True:
                 if np.argmax(yHat_test[i])==np.argmax(y_test[i]):
