@@ -38,16 +38,16 @@ NN = nn.Neural_Network(dimensionality=x_train.shape[1],hidden_size=400,\
 
 NN = nn.Neural_Network(dimensionality=x_train.shape[1],hidden_size=30,\
         output_size=1,learning_rate=0.01,\
-        dropout_hidden_rate=0.5,do_dropout=False,\
-        error_function='cross_entropy',do_regularize=False,\
-        regularization_rate=1,add_bias=True,use_nesterov_momentum=True,\
+        dropout_hidden_rate=0.5,do_dropout=True,\
+        error_function='cross_entropy',do_regularize=True,\
+        regularization_rate=0.5,add_bias=True,use_nesterov_momentum=True,\
         momentum_rate=0.9,do_random_seed=True,random_seed=1)
 
 start_time = time.time()
 
 for i in range(50):
     NN.learn_using_stochastic_gradient_descent(x=x_train,y=y_train,\
-    mini_batch_size=10,current_epoch=i, clip=True,print_loss=True)
+    mini_batch_size=10,current_epoch=i, print_loss=True)
     print('Accuracy on CV: ', NN.accuracy(x_cv,y_cv, 0.5))
 
 print('\n\n')
